@@ -2,8 +2,8 @@ from django.core.paginator import Paginator
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, get_object_or_404
 from django.views import View
-from django.contrib.auth import login
-from .forms import SigUpForm
+from django.contrib.auth import login, authenticate
+from .forms import SigUpForm, SignInForm
 from .models import Post
 
 
@@ -32,7 +32,7 @@ class PostDetailView(View):
 class SignUpView(View):
     def get(self, request, *args, **kwargs):
         form = SigUpForm()
-        return render(request, 'myblog/signup.html', context={
+        return render(request, 'myb/signup.html', context={
             'form': form,
         })
 
@@ -43,6 +43,27 @@ class SignUpView(View):
             if user is not None:
                 login(request, user)
                 return HttpResponseRedirect('/')
-        return render(request, 'myblog/signup.html', context={
+        return render(request, 'myb/signup.html', context={
+            'form': form,
+        })
+
+
+class SignInView(View):
+    def get(self, request, *args, **kwargs):
+        form = SignInForm()
+        return render(request, 'myb/signin.html', context={
+            'form': form,
+        })
+
+    def post(self, request, *args, **kwargs):
+        form = SignInForm(request.POST)
+        if form.is_valid():
+            username = request.POST['username']
+            password = request.POST['password']
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return HttpResponseRedirect('/')
+        return render(request, 'myb/signin.html', context={
             'form': form,
         })
